@@ -35,7 +35,9 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 z-50">
-          <span className={`text-2xl font-bold tracking-tighter ${isScrolled || location.pathname !== '/' ? 'text-black' : 'text-black md:text-white'}`}>
+          <span className={`text-2xl font-bold tracking-tighter transition-colors ${
+            isScrolled || location.pathname !== '/' || isMobileMenuOpen ? 'text-black' : 'text-white'
+          }`}>
             AUTOLUSTER
           </span>
         </Link>
@@ -47,7 +49,7 @@ export default function Navbar() {
               key={link.name}
               href={link.path}
               className={`text-sm font-medium transition-colors hover:text-gray-500 ${
-                isScrolled || location.pathname !== '/' ? 'text-gray-900' : 'text-gray-900 md:text-gray-200'
+                isScrolled || location.pathname !== '/' ? 'text-gray-900' : 'text-gray-200 hover:text-white'
               }`}
             >
               {link.name}
@@ -60,7 +62,7 @@ export default function Navbar() {
           <Link
             to="/login"
             className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-gray-500 ${
-              isScrolled || location.pathname !== '/' ? 'text-gray-900' : 'text-gray-900 md:text-gray-200'
+              isScrolled || location.pathname !== '/' ? 'text-gray-900' : 'text-gray-200 hover:text-white'
             }`}
           >
             <User size={18} />
@@ -77,13 +79,13 @@ export default function Navbar() {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden z-50"
+          className="md:hidden z-50 transition-colors"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? (
-            <X size={24} className={isScrolled || location.pathname !== '/' ? 'text-black' : 'text-black'} />
+            <X size={24} className={isScrolled || location.pathname !== '/' || isMobileMenuOpen ? 'text-black' : 'text-white'} />
           ) : (
-            <Menu size={24} className={isScrolled || location.pathname !== '/' ? 'text-black' : 'text-black'} />
+            <Menu size={24} className={isScrolled || location.pathname !== '/' ? 'text-black' : 'text-white'} />
           )}
         </button>
 
