@@ -22,6 +22,7 @@ export default function Navbar() {
     { name: 'Pricing', path: '/#pricing' },
     { name: 'Packages', path: '/#packages' },
     { name: 'Reviews', path: '/#reviews' },
+    { name: 'Employee', path: '/employee' },
     { name: 'Contact', path: '/#contact' },
   ];
 
