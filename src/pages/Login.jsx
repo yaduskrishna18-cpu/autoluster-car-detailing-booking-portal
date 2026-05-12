@@ -1,12 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Phone, ChevronRight, Lock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Mail, Phone, ChevronRight, Lock, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [authMethod, setAuthMethod] = useState('email'); // 'email' or 'phone'
   const [step, setStep] = useState(1); // 1: input, 2: otp
   const [inputValue, setInputValue] = useState('');
+  const [resendTimer, setResendTimer] = useState(30);
+  const [showResendSuccess, setShowResendSuccess] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let interval;
+    if (step === 2 && resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [step, resendTimer]);
+
+  const handleSendOTP = () => {
+    // Simulate sending OTP
+    setStep(2);
+    setResendTimer(30);
+    setShowResendSuccess(false);
+  };
+
+  const handleResend = () => {
+    if (resendTimer === 0) {
+      // Simulate resending
+      setResendTimer(30);
+      setShowResendSuccess(true);
+      setTimeout(() => setShowResendSuccess(false), 3000);
+    }
+  };
+
+  const handleVerify = () => {
+    // Mock login routing
+    if (authMethod === 'email' && inputValue.toLowerCase() === 'yaduskrishna18@gmail.com') {
+      navigate('/admin');
+    } else if (inputValue.includes('employee')) {
+      navigate('/employee');
+    } else {
+      navigate('/dashboard');
+    }
+  };
 
   return (
     <div className="pt-24 pb-20 min-h-screen bg-[#fafafa] flex items-center justify-center">
@@ -68,7 +108,7 @@ export default function Login() {
                 </div>
 
                 <button
-                  onClick={() => setStep(2)}
+                  onClick={handleSendOTP}
                   disabled={!inputValue}
                   className="w-full bg-black text-white py-4 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -111,27 +151,47 @@ export default function Login() {
                   ))}
                 </div>
 
-                <Link
-                  to="/dashboard"
-                  className="w-full bg-black text-white py-4 rounded-xl font-medium flex items-center justify-center hover:bg-gray-800 transition-colors"
+                <button
+                  onClick={handleVerify}
+                  className="w-full bg-black text-white py-4 rounded-xl font-medium flex items-center justify-center hover:bg-gray-800 transition-colors mb-6"
                 >
                   Verify & Login
-                </Link>
+                </button>
 
-                <div className="mt-6 text-center text-sm">
-                  <span className="text-gray-500">Didn't receive the code? </span>
-                  <button className="text-black font-medium underline">Resend</button>
+                <div className="text-center text-sm">
+                  {showResendSuccess ? (
+                    <div className="flex justify-center items-center gap-2 text-green-600 font-medium">
+                      <CheckCircle2 size={16} /> Code resent successfully
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-gray-500">Didn't receive the code? </span>
+                      <button 
+                        onClick={handleResend}
+                        disabled={resendTimer > 0}
+                        className={`font-medium underline transition-colors ${resendTimer > 0 ? 'text-gray-300 cursor-not-allowed' : 'text-black'}`}
+                      >
+                        Resend {resendTimer > 0 ? `(${resendTimer}s)` : ''}
+                      </button>
+                    </>
+                  )}
                 </div>
                 
                 <button 
                   onClick={() => setStep(1)}
-                  className="mt-4 w-full text-center text-sm text-gray-500 hover:text-black transition-colors"
+                  className="mt-6 w-full text-center text-sm text-gray-500 hover:text-black transition-colors"
                 >
                   Change {authMethod === 'email' ? 'email address' : 'phone number'}
                 </button>
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        <div className="mt-8 text-center">
+          <p className="text-gray-500 text-sm">
+            Are you an employee? <button onClick={() => navigate('/employee')} className="text-black font-medium underline">Employee Portal</button>
+          </p>
         </div>
 
       </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, MapPin, CarFront, Check, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, MapPin, CarFront, Check, ChevronRight, Navigation, CreditCard, ShieldCheck } from 'lucide-react';
 
 const pricingData = {
   'Normal Wash': { Hatchback: 499, Sedan: 699, SUV: 899, 'Luxury Vehicle': 1299 },
@@ -24,10 +24,13 @@ export default function Booking() {
     date: '',
     time: '',
     location: '',
-    notes: ''
+    notes: '',
+    paymentMethod: 'card'
   });
   
   const [totalPrice, setTotalPrice] = useState(0);
+  const [isLocating, setIsLocating] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   useEffect(() => {
     if (formData.service && formData.vehicleType) {
@@ -39,6 +42,34 @@ export default function Booking() {
 
   const updateForm = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleGetLocation = () => {
+    setIsLocating(true);
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          updateForm('location', `GPS Coordinates: ${position.coords.latitude.toFixed(5)}, ${position.coords.longitude.toFixed(5)}\n[Live Location Fetched]`);
+          setIsLocating(false);
+        },
+        (error) => {
+          alert("Unable to retrieve your location. Please enter manually.");
+          setIsLocating(false);
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+      setIsLocating(false);
+    }
+  };
+
+  const processPayment = () => {
+    setIsProcessingPayment(true);
+    // Simulate payment API call routing to owner number
+    setTimeout(() => {
+      setIsProcessingPayment(false);
+      setStep(4); // Success step
+    }, 2500);
   };
 
   const isStep1Valid = formData.service && formData.vehicleType;
@@ -56,12 +87,14 @@ export default function Booking() {
           </div>
 
           {/* Stepper */}
-          <div className="flex items-center gap-4 mb-10">
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold transition-colors ${step >= 1 ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'}`}>1</div>
+          <div className="flex items-center gap-2 mb-10 text-sm font-medium">
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${step >= 1 ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'}`}>1</div>
             <div className={`h-1 flex-grow rounded-full ${step >= 2 ? 'bg-black' : 'bg-gray-200'}`}></div>
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold transition-colors ${step >= 2 ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'}`}>2</div>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${step >= 2 ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'}`}>2</div>
             <div className={`h-1 flex-grow rounded-full ${step >= 3 ? 'bg-black' : 'bg-gray-200'}`}></div>
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold transition-colors ${step >= 3 ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'}`}>3</div>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${step >= 3 ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'}`}>3</div>
+            <div className={`h-1 flex-grow rounded-full ${step >= 4 ? 'bg-black' : 'bg-gray-200'}`}></div>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${step >= 4 ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'}`}>4</div>
           </div>
 
           <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm relative overflow-hidden min-h-[500px]">
@@ -187,11 +220,21 @@ export default function Booking() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Service Location (Full Address)</label>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-sm font-medium text-gray-700">Service Location</label>
+                        <button 
+                          onClick={handleGetLocation}
+                          disabled={isLocating}
+                          className="text-xs font-medium bg-blue-50 text-blue-600 px-3 py-1.5 rounded-md flex items-center gap-1 hover:bg-blue-100 transition-colors"
+                        >
+                          <Navigation size={14} className={isLocating ? 'animate-spin' : ''} />
+                          {isLocating ? 'Locating...' : 'Use Live Location'}
+                        </button>
+                      </div>
                       <div className="relative">
                         <textarea 
                           rows="3"
-                          placeholder="Enter your complete address..."
+                          placeholder="Enter your complete address or use Live Location..."
                           value={formData.location}
                           onChange={(e) => updateForm('location', e.target.value)}
                           className="w-full p-4 pl-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-black focus:border-black resize-none"
@@ -224,16 +267,82 @@ export default function Booking() {
                       disabled={!isStep2Valid}
                       className="bg-black text-white px-8 py-3 rounded-full font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors"
                     >
-                      Review & Confirm <ChevronRight size={18} />
+                      Proceed to Payment <ChevronRight size={18} />
                     </button>
                   </div>
                 </motion.div>
               )}
 
-              {/* STEP 3: Success Confirmation (Mocked) */}
+              {/* STEP 3: Payment Portal */}
               {step === 3 && (
                 <motion.div
                   key="step3"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <h2 className="text-xl font-bold mb-2">Secure Payment Gateway</h2>
+                  <p className="text-gray-500 text-sm mb-6">Payment will be directly credited to owner account (9946594585).</p>
+                  
+                  <div className="border border-gray-200 rounded-xl p-6 mb-8 bg-gray-50">
+                    <div className="flex justify-between items-center mb-6">
+                      <span className="font-medium text-gray-700">Total Amount Payable</span>
+                      <span className="text-2xl font-bold">₹{totalPrice.toLocaleString()}</span>
+                    </div>
+
+                    <div className="space-y-4">
+                      <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${formData.paymentMethod === 'card' ? 'border-black bg-white ring-1 ring-black' : 'border-gray-200 bg-white'}`}>
+                        <input type="radio" name="payment" value="card" checked={formData.paymentMethod === 'card'} onChange={() => updateForm('paymentMethod', 'card')} className="sr-only" />
+                        <CreditCard size={24} className="text-gray-600 mr-4" />
+                        <div>
+                          <p className="font-medium">Credit / Debit Card</p>
+                          <p className="text-xs text-gray-500">Visa, Mastercard, RuPay</p>
+                        </div>
+                      </label>
+                      <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${formData.paymentMethod === 'upi' ? 'border-black bg-white ring-1 ring-black' : 'border-gray-200 bg-white'}`}>
+                        <input type="radio" name="payment" value="upi" checked={formData.paymentMethod === 'upi'} onChange={() => updateForm('paymentMethod', 'upi')} className="sr-only" />
+                        <div className="w-6 h-6 bg-green-100 text-green-700 rounded-md flex items-center justify-center font-bold text-xs mr-4">UPI</div>
+                        <div>
+                          <p className="font-medium">UPI Payment</p>
+                          <p className="text-xs text-gray-500">Google Pay, PhonePe, Paytm</p>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-8 justify-center">
+                    <ShieldCheck size={16} className="text-green-600" />
+                    <span>256-bit SSL Encrypted Secure Checkout</span>
+                  </div>
+
+                  <div className="mt-10 flex justify-between">
+                    <button 
+                      onClick={() => setStep(2)}
+                      disabled={isProcessingPayment}
+                      className="text-black px-6 py-3 rounded-full font-medium border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                    >
+                      Back
+                    </button>
+                    <button 
+                      onClick={processPayment}
+                      disabled={isProcessingPayment}
+                      className="bg-black text-white px-8 py-3 rounded-full font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors min-w-[160px] justify-center"
+                    >
+                      {isProcessingPayment ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      ) : (
+                        `Pay ₹${totalPrice.toLocaleString()}`
+                      )}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* STEP 4: Success Confirmation */}
+              {step === 4 && (
+                <motion.div
+                  key="step4"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center justify-center text-center h-full pt-10"
@@ -241,18 +350,18 @@ export default function Booking() {
                   <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
                     <Check size={40} className="text-green-600" />
                   </div>
-                  <h2 className="text-3xl font-bold mb-4">Booking Confirmed!</h2>
+                  <h2 className="text-3xl font-bold mb-2">Booking & Payment Confirmed!</h2>
                   <p className="text-gray-500 mb-8 max-w-md">
-                    Thank you for choosing Autoluster. Your premium detailing service has been scheduled for {formData.date} at {formData.time}. We will send a confirmation via SMS shortly.
+                    Thank you! Your payment of ₹{totalPrice.toLocaleString()} was successful (Txn ID: TXN{Math.floor(Math.random()*1000000)}). The order has been routed to our staff.
                   </p>
                   <button 
                     onClick={() => {
                       setStep(1);
-                      setFormData({service:'', vehicleType:'', vehicleModel:'', date:'', time:'', location:'', notes:''});
+                      setFormData({service:'', vehicleType:'', vehicleModel:'', date:'', time:'', location:'', notes:'', paymentMethod: 'card'});
                     }}
                     className="bg-black text-white px-8 py-3 rounded-full font-medium hover:bg-gray-800 transition-colors"
                   >
-                    Book Another Service
+                    Return Home
                   </button>
                 </motion.div>
               )}
@@ -290,12 +399,11 @@ export default function Booking() {
 
             <div className="pt-6 border-t border-white/10 mt-auto">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-400">Estimated Total</span>
+                <span className="text-gray-400">Total Payable</span>
               </div>
-              <div className="text-4xl font-bold tracking-tight">
+              <div className="text-4xl font-bold tracking-tight text-[#d4af37]">
                 {totalPrice > 0 ? `₹${totalPrice.toLocaleString()}` : '₹0'}
               </div>
-              <p className="text-xs text-gray-500 mt-4">Taxes and additional charges may apply based on vehicle condition upon inspection.</p>
             </div>
           </div>
         </div>

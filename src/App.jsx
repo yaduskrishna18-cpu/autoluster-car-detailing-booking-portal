@@ -9,6 +9,8 @@ import Home from './pages/Home';
 import Booking from './pages/Booking';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import EmployeePortal from './pages/EmployeePortal';
+import AdminDashboard from './pages/AdminDashboard';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -33,6 +35,8 @@ function App() {
               <Route path="/booking" element={<Booking />} />
               <Route path="/login" element={<Login />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/employee" element={<EmployeePortal />} />
+              <Route path="/admin" element={<AdminDashboard />} />
             </Routes>
           </AnimatePresence>
         </main>
