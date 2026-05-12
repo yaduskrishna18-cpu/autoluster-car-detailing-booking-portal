@@ -42,22 +42,35 @@ export default function AdminDashboard() {
         </div>
 
         {/* Global KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <div className="bg-[#111111] text-white p-6 rounded-3xl shadow-lg relative overflow-hidden">
             <TrendingUp size={100} className="absolute -right-6 -bottom-6 opacity-5 text-white" />
             <p className="text-gray-400 text-sm font-medium mb-1">Total Revenue (Month)</p>
             <h2 className="text-3xl font-bold text-[#d4af37]">₹1,42,500</h2>
-            <p className="text-green-400 text-xs mt-2">+12% from last month</p>
+            <p className="text-green-400 text-xs mt-2 font-medium">+12% from last month</p>
           </div>
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
             <p className="text-gray-500 text-sm font-medium mb-1">Active Bookings</p>
             <h2 className="text-3xl font-bold text-black">24</h2>
-            <p className="text-gray-400 text-xs mt-2">8 require assignment</p>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-orange-500 text-xs font-bold bg-orange-50 px-2 py-0.5 rounded">8 Pending</span>
+              <span className="text-green-600 text-xs font-bold bg-green-50 px-2 py-0.5 rounded">16 Assigned</span>
+            </div>
           </div>
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <p className="text-gray-500 text-sm font-medium mb-1">Active Staff</p>
-            <h2 className="text-3xl font-bold text-black">12</h2>
-            <p className="text-gray-400 text-xs mt-2">Available for dispatch</p>
+            <p className="text-gray-500 text-sm font-medium mb-1">Online Staff</p>
+            <h2 className="text-3xl font-bold text-black flex items-center gap-2">
+              8 <span className="text-gray-400 text-lg font-normal">/ 12</span>
+            </h2>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="w-2 h-2 rounded-full bg-green-500"></span>
+              <span className="text-gray-500 text-xs font-medium">Currently active in field</span>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+            <p className="text-gray-500 text-sm font-medium mb-1">Customer Satisfaction</p>
+            <h2 className="text-3xl font-bold text-black">4.9<span className="text-gray-400 text-lg font-normal">/5</span></h2>
+            <p className="text-blue-600 text-xs mt-2 font-medium bg-blue-50 w-max px-2 py-0.5 rounded">Based on 500+ Reviews</p>
           </div>
         </div>
 
