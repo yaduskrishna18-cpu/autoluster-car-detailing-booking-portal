@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { UserPlus, Briefcase, IndianRupee, Clock, MapPin, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { UserPlus, Briefcase, IndianRupee, Clock, MapPin, CheckCircle2, ChevronRight, User, Mail, Phone } from 'lucide-react';
 
 const mockOrders = [
   { id: 'ORD-1092', service: 'Full Body Detailing', vehicle: 'BMW 5 Series', time: '10:00 AM', location: 'GPS: 12.9716, 77.5946', payout: 1500, status: 'Pending' },
@@ -9,11 +9,22 @@ const mockOrders = [
 
 export default function EmployeePortal() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authMode, setAuthMode] = useState('login'); // 'login', 'register', 'pending'
   const [empId, setEmpId] = useState('');
+  
+  // Registration Form State
+  const [regData, setRegData] = useState({ name: '', email: '', phone: '', location: '' });
+  
   const [orders, setOrders] = useState(mockOrders);
 
   const handleLogin = () => {
     if (empId) setIsLoggedIn(true);
+  };
+
+  const handleRegister = () => {
+    if (regData.name && regData.phone && regData.location) {
+      setAuthMode('pending');
+    }
   };
 
   const completeOrder = (id) => {
@@ -23,29 +34,124 @@ export default function EmployeePortal() {
   if (!isLoggedIn) {
     return (
       <div className="pt-24 pb-20 min-h-screen bg-[#fafafa] flex items-center justify-center">
-        <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4">
-              <UserPlus size={24} />
-            </div>
-            <h1 className="text-2xl font-bold">Employee Portal</h1>
-            <p className="text-gray-500 text-sm mt-2">Login or create your Employee ID to start accepting detailing jobs.</p>
-          </div>
+        <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl w-full max-w-md overflow-hidden relative">
           
-          <input 
-            type="text" 
-            placeholder="Enter Employee ID (e.g. EMP-001)"
-            value={empId}
-            onChange={(e) => setEmpId(e.target.value)}
-            className="w-full p-4 border border-gray-200 rounded-xl mb-4 focus:ring-1 focus:ring-black focus:outline-none"
-          />
-          <button 
-            onClick={handleLogin}
-            disabled={!empId}
-            className="w-full bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
-          >
-            Access Portal
-          </button>
+          <AnimatePresence mode="wait">
+            {authMode === 'login' && (
+              <motion.div
+                key="login"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+              >
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Briefcase size={24} />
+                  </div>
+                  <h1 className="text-2xl font-bold">Employee Login</h1>
+                  <p className="text-gray-500 text-sm mt-2">Enter your Employee ID to access your dashboard.</p>
+                </div>
+                
+                <input 
+                  type="text" 
+                  placeholder="Enter Employee ID (e.g. EMP-001)"
+                  value={empId}
+                  onChange={(e) => setEmpId(e.target.value)}
+                  className="w-full p-4 border border-gray-200 rounded-xl mb-4 focus:ring-1 focus:ring-black focus:outline-none"
+                />
+                <button 
+                  onClick={handleLogin}
+                  disabled={!empId}
+                  className="w-full bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+                >
+                  Access Portal
+                </button>
+
+                <div className="mt-6 text-center text-sm">
+                  <span className="text-gray-500">Want to join our team? </span>
+                  <button onClick={() => setAuthMode('register')} className="text-black font-medium underline">Register Here</button>
+                </div>
+              </motion.div>
+            )}
+
+            {authMode === 'register' && (
+              <motion.div
+                key="register"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                    <UserPlus size={24} className="text-gray-800" />
+                  </div>
+                  <h1 className="text-2xl font-bold">Join Autoluster</h1>
+                  <p className="text-gray-500 text-sm mt-2">Apply to become a detailing specialist.</p>
+                </div>
+                
+                <div className="space-y-4 mb-6">
+                  <div className="relative">
+                    <input type="text" placeholder="Full Name" value={regData.name} onChange={e => setRegData({...regData, name: e.target.value})} className="w-full p-4 pl-11 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-black text-sm" />
+                    <User size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  </div>
+                  <div className="relative">
+                    <input type="email" placeholder="Email Address" value={regData.email} onChange={e => setRegData({...regData, email: e.target.value})} className="w-full p-4 pl-11 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-black text-sm" />
+                    <Mail size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  </div>
+                  <div className="relative">
+                    <input type="tel" placeholder="Phone Number" value={regData.phone} onChange={e => setRegData({...regData, phone: e.target.value})} className="w-full p-4 pl-11 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-black text-sm" />
+                    <Phone size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  </div>
+                  <div className="relative">
+                    <input type="text" placeholder="City / Operating Location" value={regData.location} onChange={e => setRegData({...regData, location: e.target.value})} className="w-full p-4 pl-11 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-black text-sm" />
+                    <MapPin size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  </div>
+                </div>
+
+                <button 
+                  onClick={handleRegister}
+                  disabled={!regData.name || !regData.phone || !regData.location}
+                  className="w-full bg-black text-white py-4 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50"
+                >
+                  Send Request to Owner <ChevronRight size={18} />
+                </button>
+
+                <div className="mt-6 text-center text-sm">
+                  <span className="text-gray-500">Already have an ID? </span>
+                  <button onClick={() => setAuthMode('login')} className="text-black font-medium underline">Login</button>
+                </div>
+              </motion.div>
+            )}
+
+            {authMode === 'pending' && (
+              <motion.div
+                key="pending"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-6"
+              >
+                <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle2 size={40} className="text-blue-600" />
+                </div>
+                <h1 className="text-2xl font-bold mb-4">Request Submitted!</h1>
+                <p className="text-gray-500 text-sm leading-relaxed mb-8">
+                  Your application has been sent directly to the owner for review. 
+                  <br/><br/>
+                  After acceptance, you will receive your permanent <b>Employee ID</b> via WhatsApp or Email.
+                </p>
+                <button 
+                  onClick={() => {
+                    setAuthMode('login');
+                    setRegData({ name: '', email: '', phone: '', location: '' });
+                  }}
+                  className="w-full text-black py-4 rounded-xl font-medium border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  Return to Login
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
         </div>
       </div>
     );
