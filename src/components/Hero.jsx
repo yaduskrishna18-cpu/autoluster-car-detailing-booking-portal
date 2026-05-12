@@ -45,7 +45,7 @@ export default function Hero() {
         >
           <Link
             to="/booking"
-            className="bg-white text-black px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors flex items-center justify-center w-full sm:w-auto min-w-[200px]"
+            className="bg-black text-white px-8 py-4 rounded-full text-base font-medium border border-white/20 hover:bg-gray-900 transition-colors flex items-center justify-center w-full sm:w-auto min-w-[200px]"
           >
             Book a Service
           </Link>

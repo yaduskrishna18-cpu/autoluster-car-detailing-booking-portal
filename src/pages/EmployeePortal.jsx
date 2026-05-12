@@ -236,6 +236,27 @@ export default function EmployeePortal() {
               </div>
             ))}
           </div>
+
+          {/* Upload Finished Work Section */}
+          <div className="mt-8 bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm">
+            <h2 className="text-xl font-bold mb-4">Upload Finished Work</h2>
+            <p className="text-gray-500 text-sm mb-6">Upload photos of completed jobs to be featured in the Autoluster public gallery.</p>
+            
+            <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              </div>
+              <p className="font-medium text-black mb-1">Click to upload photos</p>
+              <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
+            </div>
+            
+            <div className="mt-6 flex flex-col md:flex-row gap-4">
+              <input type="text" placeholder="Vehicle Name (e.g. BMW 5 Series)" className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-black text-sm" />
+              <button className="bg-black text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors">
+                Submit to Gallery
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>
