@@ -66,22 +66,75 @@ export default function Booking() {
     }
   };
 
-  const processPayment = () => {
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const processPayment = async () => {
     setIsProcessingPayment(true);
-    // Simulate payment API call routing to owner number
-    setTimeout(() => {
-      const newBooking = addBooking({
-        customer: 'Guest User', // Mock customer name
-        service: formData.service,
-        vehicle: formData.vehicleModel || formData.vehicleType,
-        time: formData.time,
-        location: formData.location,
-        price: totalPrice,
-      });
-      setAssignedEmployeeId(newBooking.employee);
+    
+    const res = await loadRazorpayScript();
+      
+    if (!res) {
+      alert('Razorpay SDK failed to load. Are you online?');
       setIsProcessingPayment(false);
-      setStep(4); // Success step
-    }, 2500);
+      return;
+    }
+
+    const options = {
+      key: 'rzp_test_dummykey12345', // Demo Test Key
+      amount: totalPrice * 100, // Amount is in currency subunits (paise)
+      currency: 'INR',
+      name: 'Autoluster Detailing',
+      description: `${formData.service} for ${formData.vehicleType}`,
+      image: 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&q=80&w=100',
+      handler: function (response) {
+        // Payment Success Handler
+        const newBooking = addBooking({
+          customer: 'Guest User', // Mock customer name
+          service: formData.service,
+          vehicle: formData.vehicleModel || formData.vehicleType,
+          time: formData.time,
+          location: formData.location,
+          price: totalPrice,
+          paymentId: response.razorpay_payment_id
+        });
+        setAssignedEmployeeId(newBooking.employee);
+        setIsProcessingPayment(false);
+        setStep(4); // Success step
+      },
+      prefill: {
+        name: 'Guest User',
+        email: 'guest@example.com',
+        contact: '9946594585' // Requesting owner number
+      },
+      notes: {
+        address: formData.location
+      },
+      theme: {
+        color: '#000000'
+      }
+    };
+
+    const paymentObject = new window.Razorpay(options);
+    
+    paymentObject.on('payment.failed', function (response){
+      alert('Payment Failed: ' + response.error.description);
+      setIsProcessingPayment(false);
+    });
+    
+    // If the modal is closed without success or failure
+    paymentObject.on('payment.modal.closed', function() {
+        setIsProcessingPayment(false);
+    });
+    
+    paymentObject.open();
   };
 
   const isStep1Valid = formData.service && formData.vehicleType;
