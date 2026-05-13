@@ -77,6 +77,44 @@ export default function Booking() {
   };
 
   const processPayment = async () => {
+    if (formData.paymentMethod !== 'card') {
+      // Directly open UPI app
+      const upiId = '9946594585@ybl'; // Owner's UPI ID (example format)
+      const name = 'Autoluster';
+      const note = `Autoluster: ${formData.service}`;
+      const amount = totalPrice;
+      const baseParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+      
+      let deepLink = `upi://pay?${baseParams}`;
+      if (formData.paymentMethod === 'gpay') deepLink = `tez://upi/pay?${baseParams}`;
+      if (formData.paymentMethod === 'phonepe') deepLink = `phonepe://pay?${baseParams}`;
+      if (formData.paymentMethod === 'paytm') deepLink = `paytmmp://pay?${baseParams}`;
+      
+      // Attempt to open the payment app directly
+      window.location.href = deepLink;
+      
+      // Simulate server-side payment verification (polling)
+      setIsProcessingPayment(true);
+      
+      setTimeout(() => {
+        const newBooking = addBooking({
+          customer: 'Guest User',
+          service: formData.service,
+          vehicle: formData.vehicleModel || formData.vehicleType,
+          time: formData.time,
+          location: formData.location,
+          price: totalPrice,
+          paymentId: `UPI_${Math.floor(Math.random()*1000000)}`
+        });
+        setAssignedEmployeeId(newBooking.employee);
+        setIsProcessingPayment(false);
+        setStep(4); // Success step
+      }, 7000); // 7 seconds wait to simulate user paying in the app and returning
+      
+      return;
+    }
+
+    // Razorpay Fallback for Card
     setIsProcessingPayment(true);
     
     const res = await loadRazorpayScript();
@@ -88,16 +126,15 @@ export default function Booking() {
     }
 
     const options = {
-      key: 'rzp_test_dummykey12345', // Demo Test Key
-      amount: totalPrice * 100, // Amount is in currency subunits (paise)
+      key: 'rzp_test_dummykey12345',
+      amount: totalPrice * 100,
       currency: 'INR',
       name: 'Autoluster Detailing',
       description: `${formData.service} for ${formData.vehicleType}`,
       image: 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&q=80&w=100',
       handler: function (response) {
-        // Payment Success Handler
         const newBooking = addBooking({
-          customer: 'Guest User', // Mock customer name
+          customer: 'Guest User',
           service: formData.service,
           vehicle: formData.vehicleModel || formData.vehicleType,
           time: formData.time,
@@ -107,12 +144,12 @@ export default function Booking() {
         });
         setAssignedEmployeeId(newBooking.employee);
         setIsProcessingPayment(false);
-        setStep(4); // Success step
+        setStep(4);
       },
       prefill: {
         name: 'Guest User',
         email: 'guest@example.com',
-        contact: '9946594585' // Requesting owner number
+        contact: '9946594585'
       },
       notes: {
         address: formData.location
@@ -129,7 +166,6 @@ export default function Booking() {
       setIsProcessingPayment(false);
     });
     
-    // If the modal is closed without success or failure
     paymentObject.on('payment.modal.closed', function() {
         setIsProcessingPayment(false);
     });
@@ -426,7 +462,10 @@ export default function Booking() {
                       className="bg-black text-white px-8 py-3 rounded-full font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors min-w-[160px] justify-center"
                     >
                       {isProcessingPayment ? (
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          <span>{formData.paymentMethod !== 'card' ? 'Verifying...' : 'Processing...'}</span>
+                        </div>
                       ) : (
                         `Pay ₹${totalPrice.toLocaleString()}`
                       )}
