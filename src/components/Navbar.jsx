@@ -45,17 +45,33 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.path}
-              className={`text-sm font-medium transition-colors hover:text-gray-500 ${
-                isScrolled || location.pathname !== '/' ? 'text-gray-900' : 'text-gray-200 hover:text-white'
-              }`}
-            >
-              {link.name}
-            </a>
-          ))}
+          {navLinks.map((link) => {
+            const isHashLink = link.path.startsWith('/#');
+            if (isHashLink) {
+              return (
+                <a
+                  key={link.name}
+                  href={link.path}
+                  className={`text-sm font-medium transition-colors hover:text-gray-500 ${
+                    isScrolled || location.pathname !== '/' ? 'text-gray-900' : 'text-gray-200 hover:text-white'
+                  }`}
+                >
+                  {link.name}
+                </a>
+              );
+            }
+            return (
+              <Link
+                key={link.name}
+                to={link.path}
+                className={`text-sm font-medium transition-colors hover:text-gray-500 ${
+                  isScrolled || location.pathname !== '/' ? 'text-gray-900' : 'text-gray-200 hover:text-white'
+                }`}
+              >
+                {link.name}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Actions */}
@@ -99,16 +115,31 @@ export default function Navbar() {
               exit={{ opacity: 0, y: -20 }}
               className="absolute top-0 left-0 right-0 h-screen bg-white flex flex-col items-center justify-center space-y-8 z-40"
             >
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-2xl font-medium text-gray-900"
-                >
-                  {link.name}
-                </a>
-              ))}
+              {navLinks.map((link) => {
+                const isHashLink = link.path.startsWith('/#');
+                if (isHashLink) {
+                  return (
+                    <a
+                      key={link.name}
+                      href={link.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="text-2xl font-medium text-gray-900"
+                    >
+                      {link.name}
+                    </a>
+                  );
+                }
+                return (
+                  <Link
+                    key={link.name}
+                    to={link.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-2xl font-medium text-gray-900"
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
               <div className="flex flex-col gap-4 mt-8 w-full max-w-xs">
                 <Link
                   to="/login"

@@ -17,7 +17,6 @@ export default function EmployeePortal() {
   const beforeInputRef = useRef(null);
   const afterInputRef = useRef(null);
 
-  // File to Base64
   const handleFileChange = (e, setImage) => {
     const file = e.target.files[0];
     if (file) {
@@ -28,7 +27,7 @@ export default function EmployeePortal() {
   };
 
   const handleLogin = () => {
-    const emp = employees.find(e => e.id.toLowerCase() === empId.toLowerCase() && e.status === 'Active');
+    const emp = employees.find(e => e.id.toLowerCase() === empId.trim().toLowerCase() && e.status === 'Active');
     if (emp) {
       login({ ...emp, role: 'employee' });
     } else {
@@ -88,7 +87,7 @@ export default function EmployeePortal() {
                 />
                 <button 
                   onClick={handleLogin}
-                  disabled={!empId}
+                  disabled={!empId.trim()}
                   className="w-full bg-black text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
                 >
                   Access Portal
@@ -184,7 +183,9 @@ export default function EmployeePortal() {
     );
   }
 
-  const assignedOrders = bookings.filter(b => b.employee === currentUser.id);
+  // Find the latest employee state from context to show real-time earnings updates
+  const currentEmployee = employees.find(e => e.id === currentUser.id) || currentUser;
+  const assignedOrders = bookings.filter(b => b.employee === currentEmployee.id);
 
   return (
     <div className="pt-24 pb-20 min-h-screen bg-[#fafafa]">
@@ -193,8 +194,8 @@ export default function EmployeePortal() {
         {/* Sidebar */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm mb-6">
-            <h2 className="font-bold text-lg mb-1">{currentUser.name}</h2>
-            <p className="text-gray-500 text-sm mb-4">ID: {currentUser.id}</p>
+            <h2 className="font-bold text-lg mb-1">{currentEmployee.name}</h2>
+            <p className="text-gray-500 text-sm mb-4">ID: {currentEmployee.id}</p>
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase">
               <span className="w-2 h-2 rounded-full bg-green-500"></span> Active & Ready
             </div>
@@ -205,17 +206,17 @@ export default function EmployeePortal() {
             <div className="space-y-4">
               <div>
                 <span className="text-xs text-gray-500 uppercase tracking-wider">Today</span>
-                <div className="text-2xl font-bold text-[#d4af37]">₹{currentUser.today || 0}</div>
+                <div className="text-2xl font-bold text-[#d4af37]">₹{currentEmployee.today || 0}</div>
               </div>
               <div className="h-px bg-white/10"></div>
               <div>
                 <span className="text-xs text-gray-500 uppercase tracking-wider">This Week</span>
-                <div className="text-xl font-bold">₹{currentUser.week || 0}</div>
+                <div className="text-xl font-bold">₹{currentEmployee.week || 0}</div>
               </div>
               <div className="h-px bg-white/10"></div>
               <div>
                 <span className="text-xs text-gray-500 uppercase tracking-wider">This Month</span>
-                <div className="text-xl font-bold">₹{currentUser.month || 0}</div>
+                <div className="text-xl font-bold">₹{currentEmployee.month || 0}</div>
               </div>
             </div>
           </div>
