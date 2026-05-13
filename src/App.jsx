@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
+import FloatingInstagram from './components/FloatingInstagram';
 
 import Home from './pages/Home';
 import Booking from './pages/Booking';
@@ -45,6 +46,7 @@ function App() {
           </main>
           <Footer />
           <FloatingWhatsApp />
+          <FloatingInstagram />
         </div>
       </Router>
     </AppProvider>
