@@ -78,9 +78,56 @@ export default function Booking() {
 
   const processPayment = async () => {
     if (formData.paymentMethod !== 'card') {
-      // For UPI, we switch to a manual verification flow
-      // where we show a QR code and a button to open the app.
-      setStep(3.5); // Use a decimal step for the "Verification" screen
+      // Directly open UPI app
+      const upiId = 'yaduskrishna18-1@okhdfcbank';
+      const name = 'Autoluster';
+      const note = `Autoluster: ${formData.service}`;
+      const amount = Number(totalPrice).toFixed(2);
+      const baseParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+      
+      let deepLink = `upi://pay?${baseParams}`;
+      if (formData.paymentMethod === 'gpay') deepLink = `tez://upi/pay?${baseParams}`;
+      if (formData.paymentMethod === 'phonepe') deepLink = `phonepe://pay?${baseParams}`;
+      if (formData.paymentMethod === 'paytm') deepLink = `paytmmp://pay?${baseParams}`;
+      
+      // Attempt to open the payment app directly
+      window.location.href = deepLink;
+      
+      setIsProcessingPayment(true);
+
+      let hasConfirmed = false;
+      const completeOrder = () => {
+        if (hasConfirmed) return;
+        hasConfirmed = true;
+        
+        const newBooking = addBooking({
+          customer: 'Guest User',
+          service: formData.service,
+          vehicle: formData.vehicleModel || formData.vehicleType,
+          time: formData.time,
+          location: formData.location,
+          price: totalPrice,
+          paymentId: `UPI_${Math.floor(Math.random()*1000000)}`
+        });
+        setAssignedEmployeeId(newBooking.employee);
+        setIsProcessingPayment(false);
+        setStep(4);
+        
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      };
+
+      // Detect when user returns from the payment app to the browser
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+          // Add a tiny delay for realism
+          setTimeout(completeOrder, 1500);
+        }
+      };
+      
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      
+      // Fallback timer just in case they don't leave the browser (e.g. laptop)
+      setTimeout(completeOrder, 8000);
       return;
     }
 
@@ -141,39 +188,6 @@ export default function Booking() {
     });
     
     paymentObject.open();
-  };
-
-  const confirmUpiPayment = () => {
-    setIsProcessingPayment(true);
-    // Simulate server checking transaction
-    setTimeout(() => {
-      const newBooking = addBooking({
-        customer: 'Guest User',
-        service: formData.service,
-        vehicle: formData.vehicleModel || formData.vehicleType,
-        time: formData.time,
-        location: formData.location,
-        price: totalPrice,
-        paymentId: `UPI_${Math.floor(Math.random()*1000000)}`
-      });
-      setAssignedEmployeeId(newBooking.employee);
-      setIsProcessingPayment(false);
-      setStep(4);
-    }, 2000);
-  };
-
-  const getUpiDeepLink = () => {
-    const upiId = 'yaduskrishna18-1@okhdfcbank';
-    const name = 'Autoluster';
-    const note = `Autoluster: ${formData.service}`;
-    // NPCI spec requires amount to have 2 decimal places
-    const amount = Number(totalPrice).toFixed(2);
-    const baseParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
-    
-    if (formData.paymentMethod === 'gpay') return `tez://upi/pay?${baseParams}`;
-    if (formData.paymentMethod === 'phonepe') return `phonepe://pay?${baseParams}`;
-    if (formData.paymentMethod === 'paytm') return `paytmmp://pay?${baseParams}`;
-    return `upi://pay?${baseParams}`;
   };
 
   const isStep1Valid = formData.service && formData.vehicleType;
@@ -472,69 +486,6 @@ export default function Booking() {
                       ) : (
                         `Pay ₹${totalPrice.toLocaleString()}`
                       )}
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* STEP 3.5: Manual UPI Verification */}
-              {step === 3.5 && (
-                <motion.div
-                  key="step3_5"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center text-center h-full pt-4"
-                >
-                  <h2 className="text-2xl font-bold mb-2">Complete Your Payment</h2>
-                  <p className="text-gray-500 mb-6 max-w-md">
-                    Please complete the payment of <b>₹{totalPrice.toLocaleString()}</b> to confirm your booking.
-                  </p>
-                  
-                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 mb-6 w-full max-w-sm">
-                    <p className="text-sm font-medium text-gray-700 mb-4">Pay to UPI ID: <br/><span className="text-black font-bold text-lg">yaduskrishna18-1@okhdfcbank</span></p>
-                    
-                    {/* Fallback QR generation via external API */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm mx-auto w-48 h-48 mb-4 border border-gray-100 flex items-center justify-center overflow-hidden relative">
-                      <img 
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(getUpiDeepLink())}`} 
-                        alt="UPI QR Code"
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    
-                    <p className="text-xs text-gray-500 mb-4">Scan QR with any UPI app, or tap below on mobile.</p>
-                    
-                    <a 
-                      href={getUpiDeepLink()}
-                      className="block w-full bg-[#111111] text-white py-3 rounded-xl font-medium hover:bg-black transition-colors"
-                    >
-                      Open {formData.paymentMethod === 'gpay' ? 'Google Pay' : formData.paymentMethod === 'phonepe' ? 'PhonePe' : formData.paymentMethod === 'paytm' ? 'Paytm' : 'UPI App'}
-                    </a>
-                  </div>
-
-                  <div className="flex flex-col gap-3 w-full max-w-sm">
-                    <button 
-                      onClick={confirmUpiPayment}
-                      disabled={isProcessingPayment}
-                      className="w-full bg-green-600 text-white py-4 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-green-700 transition-colors disabled:opacity-50"
-                    >
-                      {isProcessingPayment ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                          Verifying...
-                        </>
-                      ) : (
-                        <>
-                          <Check size={20} /> I have paid ₹{totalPrice.toLocaleString()}
-                        </>
-                      )}
-                    </button>
-                    <button 
-                      onClick={() => setStep(3)}
-                      disabled={isProcessingPayment}
-                      className="w-full text-gray-500 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
-                    >
-                      Go Back
                     </button>
                   </div>
                 </motion.div>
