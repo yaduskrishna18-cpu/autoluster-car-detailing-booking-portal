@@ -384,7 +384,7 @@ export default function Booking() {
                   transition={{ duration: 0.3 }}
                 >
                   <h2 className="text-xl font-bold mb-2">Secure Payment Gateway</h2>
-                  <p className="text-gray-500 text-sm mb-6">Payment will be directly credited to owner account (9946594585).</p>
+                  <p className="text-gray-500 text-sm mb-6">Payment will be directly credited to owner account (yaduskrishna18-1@okhdfcbank).</p>
                   
                   <div className="border border-gray-200 rounded-xl p-6 mb-8 bg-gray-50">
                     <div className="flex justify-between items-center mb-6">
