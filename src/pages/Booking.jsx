@@ -79,7 +79,7 @@ export default function Booking() {
   const processPayment = async () => {
     if (formData.paymentMethod !== 'card') {
       // Directly open UPI app
-      const upiId = '9946594585@ybl'; // Owner's UPI ID (example format)
+      const upiId = 'yaduskrishna18-1@okhdfcbank'; // Owner's UPI ID
       const name = 'Autoluster';
       const note = `Autoluster: ${formData.service}`;
       const amount = totalPrice;
