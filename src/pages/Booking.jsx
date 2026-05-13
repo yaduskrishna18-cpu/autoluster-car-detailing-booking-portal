@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, MapPin, CarFront, Check, ChevronRight, Navigation, CreditCard, ShieldCheck } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 
 const pricingData = {
   'Normal Wash': { Hatchback: 499, Sedan: 699, SUV: 899, 'Luxury Vehicle': 1299 },
@@ -16,6 +17,7 @@ const serviceTypes = Object.keys(pricingData);
 const vehicleTypes = ['Hatchback', 'Sedan', 'SUV', 'Luxury Vehicle'];
 
 export default function Booking() {
+  const { addBooking } = useAppContext();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     service: '',
@@ -31,6 +33,7 @@ export default function Booking() {
   const [totalPrice, setTotalPrice] = useState(0);
   const [isLocating, setIsLocating] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [assignedEmployeeId, setAssignedEmployeeId] = useState(null);
 
   useEffect(() => {
     if (formData.service && formData.vehicleType) {
@@ -67,6 +70,15 @@ export default function Booking() {
     setIsProcessingPayment(true);
     // Simulate payment API call routing to owner number
     setTimeout(() => {
+      const newBooking = addBooking({
+        customer: 'Guest User', // Mock customer name
+        service: formData.service,
+        vehicle: formData.vehicleModel || formData.vehicleType,
+        time: formData.time,
+        location: formData.location,
+        price: totalPrice,
+      });
+      setAssignedEmployeeId(newBooking.employee);
       setIsProcessingPayment(false);
       setStep(4); // Success step
     }, 2500);
@@ -352,7 +364,12 @@ export default function Booking() {
                   </div>
                   <h2 className="text-3xl font-bold mb-2">Booking & Payment Confirmed!</h2>
                   <p className="text-gray-500 mb-8 max-w-md">
-                    Thank you! Your payment of ₹{totalPrice.toLocaleString()} was successful (Txn ID: TXN{Math.floor(Math.random()*1000000)}). The order has been routed to our staff.
+                    Thank you! Your payment of ₹{totalPrice.toLocaleString()} was successful (Txn ID: TXN{Math.floor(Math.random()*1000000)}). 
+                    {assignedEmployeeId === 'Unassigned' ? (
+                      <span className="block mt-2 text-orange-500 font-medium">Your order is currently pending assignment. We will notify you shortly.</span>
+                    ) : (
+                      <span className="block mt-2 text-green-600 font-medium">Your order has been routed directly to detailing expert <b>{assignedEmployeeId}</b>.</span>
+                    )}
                   </p>
                   <button 
                     onClick={() => {

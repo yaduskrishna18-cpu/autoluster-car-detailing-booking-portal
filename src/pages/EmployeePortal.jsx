@@ -1,24 +1,39 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UserPlus, Briefcase, IndianRupee, Clock, MapPin, CheckCircle2, ChevronRight, User, Mail, Phone } from 'lucide-react';
-
-const mockOrders = [
-  { id: 'ORD-1092', service: 'Full Body Detailing', vehicle: 'BMW 5 Series', time: '10:00 AM', location: 'GPS: 12.9716, 77.5946', payout: 1500, status: 'Pending' },
-  { id: 'ORD-1093', service: 'Normal Wash', vehicle: 'Honda City', time: '02:00 PM', location: 'Koramangala, Bangalore', payout: 300, status: 'Pending' },
-];
+import { UserPlus, Briefcase, IndianRupee, Clock, MapPin, CheckCircle2, ChevronRight, User, Mail, Phone, ImagePlus } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 
 export default function EmployeePortal() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { employees, bookings, completeBooking, addGalleryWork, currentUser, login } = useAppContext();
+  
   const [authMode, setAuthMode] = useState('login'); // 'login', 'register', 'pending'
   const [empId, setEmpId] = useState('');
-  
-  // Registration Form State
   const [regData, setRegData] = useState({ name: '', email: '', phone: '', location: '' });
   
-  const [orders, setOrders] = useState(mockOrders);
+  // Upload State
+  const [uploadTitle, setUploadTitle] = useState('');
+  const [beforeImg, setBeforeImg] = useState(null);
+  const [afterImg, setAfterImg] = useState(null);
+  const beforeInputRef = useRef(null);
+  const afterInputRef = useRef(null);
+
+  // File to Base64
+  const handleFileChange = (e, setImage) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setImage(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleLogin = () => {
-    if (empId) setIsLoggedIn(true);
+    const emp = employees.find(e => e.id.toLowerCase() === empId.toLowerCase() && e.status === 'Active');
+    if (emp) {
+      login({ ...emp, role: 'employee' });
+    } else {
+      alert("Invalid or Inactive Employee ID");
+    }
   };
 
   const handleRegister = () => {
@@ -27,11 +42,23 @@ export default function EmployeePortal() {
     }
   };
 
-  const completeOrder = (id) => {
-    setOrders(orders.map(o => o.id === id ? { ...o, status: 'Completed' } : o));
+  const submitGalleryWork = () => {
+    if (beforeImg && afterImg && uploadTitle && currentUser) {
+      addGalleryWork({
+        title: uploadTitle,
+        beforeImg,
+        afterImg,
+        authorId: currentUser.id
+      });
+      setBeforeImg(null);
+      setAfterImg(null);
+      setUploadTitle('');
+      alert("Transformation submitted to the public gallery successfully!");
+    }
   };
 
-  if (!isLoggedIn) {
+  // If not logged in as employee
+  if (!currentUser || currentUser.role !== 'employee') {
     return (
       <div className="pt-24 pb-20 min-h-screen bg-[#fafafa] flex items-center justify-center">
         <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl w-full max-w-md overflow-hidden relative">
@@ -157,6 +184,8 @@ export default function EmployeePortal() {
     );
   }
 
+  const assignedOrders = bookings.filter(b => b.employee === currentUser.id);
+
   return (
     <div className="pt-24 pb-20 min-h-screen bg-[#fafafa]">
       <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -164,8 +193,8 @@ export default function EmployeePortal() {
         {/* Sidebar */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm mb-6">
-            <h2 className="font-bold text-lg mb-1">Employee Profile</h2>
-            <p className="text-gray-500 text-sm mb-4">ID: {empId.toUpperCase()}</p>
+            <h2 className="font-bold text-lg mb-1">{currentUser.name}</h2>
+            <p className="text-gray-500 text-sm mb-4">ID: {currentUser.id}</p>
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase">
               <span className="w-2 h-2 rounded-full bg-green-500"></span> Active & Ready
             </div>
@@ -176,17 +205,17 @@ export default function EmployeePortal() {
             <div className="space-y-4">
               <div>
                 <span className="text-xs text-gray-500 uppercase tracking-wider">Today</span>
-                <div className="text-2xl font-bold text-[#d4af37]">₹1,800</div>
+                <div className="text-2xl font-bold text-[#d4af37]">₹{currentUser.today || 0}</div>
               </div>
               <div className="h-px bg-white/10"></div>
               <div>
                 <span className="text-xs text-gray-500 uppercase tracking-wider">This Week</span>
-                <div className="text-xl font-bold">₹12,400</div>
+                <div className="text-xl font-bold">₹{currentUser.week || 0}</div>
               </div>
               <div className="h-px bg-white/10"></div>
               <div>
                 <span className="text-xs text-gray-500 uppercase tracking-wider">This Month</span>
-                <div className="text-xl font-bold">₹45,000</div>
+                <div className="text-xl font-bold">₹{currentUser.month || 0}</div>
               </div>
             </div>
           </div>
@@ -199,7 +228,10 @@ export default function EmployeePortal() {
           </h2>
           
           <div className="grid gap-4">
-            {orders.map(order => (
+            {assignedOrders.length === 0 && (
+              <p className="text-gray-500">No active orders assigned at this time.</p>
+            )}
+            {assignedOrders.map(order => (
               <div key={order.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
@@ -218,11 +250,11 @@ export default function EmployeePortal() {
 
                 <div className="flex flex-col items-end gap-3 w-full md:w-auto">
                   <div className="flex items-center gap-1 text-lg font-bold text-green-600">
-                    <IndianRupee size={18} /> {order.payout} <span className="text-xs text-gray-500 font-normal">payout</span>
+                    <IndianRupee size={18} /> {(order.price * 0.3).toFixed(0)} <span className="text-xs text-gray-500 font-normal">payout</span>
                   </div>
                   {order.status !== 'Completed' ? (
                     <button 
-                      onClick={() => completeOrder(order.id)}
+                      onClick={() => completeBooking(order.id, parseInt((order.price * 0.3).toFixed(0)))}
                       className="w-full md:w-auto bg-black text-white px-6 py-2 rounded-full font-medium hover:bg-gray-800 transition-colors"
                     >
                       Mark Completed
@@ -244,27 +276,57 @@ export default function EmployeePortal() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               {/* Before Upload */}
-              <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[160px]">
-                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                </div>
-                <p className="font-medium text-black mb-1">Upload "Before" Photo</p>
-                <p className="text-xs text-gray-500">Condition before service</p>
+              <input type="file" accept="image/*" ref={beforeInputRef} onChange={e => handleFileChange(e, setBeforeImg)} className="hidden" />
+              <div 
+                onClick={() => beforeInputRef.current.click()}
+                className="relative overflow-hidden border-2 border-dashed border-gray-200 rounded-2xl text-center hover:bg-gray-50 transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[160px]"
+              >
+                {beforeImg ? (
+                  <img src={beforeImg} alt="Before" className="absolute inset-0 w-full h-full object-cover" />
+                ) : (
+                  <div className="p-6">
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3 mx-auto">
+                      <ImagePlus size={20} className="text-gray-600" />
+                    </div>
+                    <p className="font-medium text-black mb-1">Upload "Before" Photo</p>
+                    <p className="text-xs text-gray-500">Condition before service</p>
+                  </div>
+                )}
               </div>
 
               {/* After Upload */}
-              <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[160px]">
-                <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                </div>
-                <p className="font-medium text-black mb-1">Upload "After" Photo</p>
-                <p className="text-xs text-gray-500">Final glossy finish</p>
+              <input type="file" accept="image/*" ref={afterInputRef} onChange={e => handleFileChange(e, setAfterImg)} className="hidden" />
+              <div 
+                onClick={() => afterInputRef.current.click()}
+                className="relative overflow-hidden border-2 border-dashed border-gray-200 rounded-2xl text-center hover:bg-gray-50 transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[160px]"
+              >
+                {afterImg ? (
+                  <img src={afterImg} alt="After" className="absolute inset-0 w-full h-full object-cover" />
+                ) : (
+                  <div className="p-6">
+                    <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3 mx-auto">
+                      <ImagePlus size={20} className="text-blue-600" />
+                    </div>
+                    <p className="font-medium text-black mb-1">Upload "After" Photo</p>
+                    <p className="text-xs text-gray-500">Final glossy finish</p>
+                  </div>
+                )}
               </div>
             </div>
             
             <div className="flex flex-col md:flex-row gap-4">
-              <input type="text" placeholder="Vehicle Model & Service (e.g. BMW 5 Series - Ceramic Coating)" className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-black text-sm" />
-              <button className="bg-black text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors whitespace-nowrap">
+              <input 
+                type="text" 
+                value={uploadTitle}
+                onChange={e => setUploadTitle(e.target.value)}
+                placeholder="Vehicle Model & Service (e.g. BMW 5 Series - Ceramic Coating)" 
+                className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-black text-sm" 
+              />
+              <button 
+                onClick={submitGalleryWork}
+                disabled={!beforeImg || !afterImg || !uploadTitle}
+                className="bg-black text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors whitespace-nowrap disabled:opacity-50"
+              >
                 Submit Transformation
               </button>
             </div>

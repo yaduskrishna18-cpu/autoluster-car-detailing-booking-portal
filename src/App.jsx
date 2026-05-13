@@ -22,28 +22,32 @@ function ScrollToTop() {
   return null;
 }
 
+import { AppProvider } from './context/AppContext';
+
 function App() {
   return (
-    <Router>
-      <ScrollToTop />
-      <div className="flex flex-col min-h-screen bg-white text-[#0a0a0a] font-sans selection:bg-[#a88132] selection:text-black">
-        <Navbar />
-        <main className="flex-grow">
-          <AnimatePresence mode="wait">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/booking" element={<Booking />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/employee" element={<EmployeePortal />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-            </Routes>
-          </AnimatePresence>
-        </main>
-        <Footer />
-        <FloatingWhatsApp />
-      </div>
-    </Router>
+    <AppProvider>
+      <Router>
+        <ScrollToTop />
+        <div className="flex flex-col min-h-screen bg-white text-[#0a0a0a] font-sans selection:bg-[#a88132] selection:text-black">
+          <Navbar />
+          <main className="flex-grow">
+            <AnimatePresence mode="wait">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/booking" element={<Booking />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/employee" element={<EmployeePortal />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+              </Routes>
+            </AnimatePresence>
+          </main>
+          <Footer />
+          <FloatingWhatsApp />
+        </div>
+      </Router>
+    </AppProvider>
   );
 }
 

@@ -1,40 +1,18 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star, MessageSquare } from 'lucide-react';
-
-const initialReviews = [
-  {
-    id: 1,
-    name: 'Rahul Sharma',
-    vehicle: 'BMW 5 Series',
-    rating: 5,
-    comment: 'Absolutely stunning work. The ceramic coating they applied to my BMW is flawless. Very professional and convenient service at my home.',
-  },
-  {
-    id: 2,
-    name: 'Priya Patel',
-    vehicle: 'Range Rover Velar',
-    rating: 5,
-    comment: 'Autoluster is the only service I trust with my SUV. The interior detailing removed all stains and left it smelling brand new.',
-  },
-  {
-    id: 3,
-    name: 'Vikram Singh',
-    vehicle: 'Porsche 911',
-    rating: 5,
-    comment: 'Punctual, meticulous, and premium. The full body detailing exceeded my expectations. Highly recommended for luxury vehicles.',
-  }
-];
+import { Star, MessageSquare, Trash2 } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 
 export default function Reviews() {
-  const [reviews, setReviews] = useState(initialReviews);
+  const { reviews, addReview, deleteReview, currentUser } = useAppContext();
   const [showForm, setShowForm] = useState(false);
   const [newReview, setNewReview] = useState({ name: '', vehicle: '', rating: 5, comment: '' });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newReview.name && newReview.comment) {
-      setReviews([{ id: Date.now(), ...newReview }, ...reviews]);
+      // Assign authorId to the current user if logged in, else an anonymous tag
+      addReview({ ...newReview, authorId: currentUser ? currentUser.id : `anon-${Date.now()}` });
       setShowForm(false);
       setNewReview({ name: '', vehicle: '', rating: 5, comment: '' });
     }
@@ -80,14 +58,24 @@ export default function Reviews() {
                 </div>
                 <p className="text-gray-600 mb-8 italic">"{review.comment}"</p>
               </div>
-              <div className="flex items-center gap-4 mt-auto">
-                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-bold text-gray-500">
-                  {review.name.charAt(0)}
+              <div className="flex items-center justify-between gap-4 mt-auto">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-bold text-gray-500">
+                    {review.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm">{review.name}</h4>
+                    <p className="text-xs text-gray-500">{review.vehicle}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-sm">{review.name}</h4>
-                  <p className="text-xs text-gray-500">{review.vehicle}</p>
-                </div>
+                {currentUser && (currentUser.id === review.authorId || currentUser.role === 'admin') && (
+                  <button 
+                    onClick={() => deleteReview(review.id)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
               </div>
             </motion.div>
           ))}

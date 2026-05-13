@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Phone, ChevronRight, Lock, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../context/AppContext';
 
 export default function Login() {
+  const { login } = useAppContext();
   const [authMethod, setAuthMethod] = useState('email'); // 'email' or 'phone'
   const [step, setStep] = useState(1); // 1: input, 2: otp
   const [inputValue, setInputValue] = useState('');
@@ -40,10 +42,12 @@ export default function Login() {
   const handleVerify = () => {
     // Mock login routing
     if (authMethod === 'email' && inputValue.toLowerCase() === 'yaduskrishna18@gmail.com') {
+      login({ id: 'admin', role: 'admin', name: 'Yadu Krishna' });
       navigate('/admin');
-    } else if (inputValue.includes('employee')) {
+    } else if (inputValue.toLowerCase().includes('employee')) {
       navigate('/employee');
     } else {
+      login({ id: `user-${Date.now()}`, role: 'customer', name: 'Customer User' });
       navigate('/dashboard');
     }
   };
