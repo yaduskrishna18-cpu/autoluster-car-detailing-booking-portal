@@ -166,7 +166,9 @@ export default function Booking() {
     const upiId = 'yaduskrishna18-1@okhdfcbank';
     const name = 'Autoluster';
     const note = `Autoluster: ${formData.service}`;
-    const baseParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&am=${totalPrice}&cu=INR&tn=${encodeURIComponent(note)}`;
+    // NPCI spec requires amount to have 2 decimal places
+    const amount = Number(totalPrice).toFixed(2);
+    const baseParams = `pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
     
     if (formData.paymentMethod === 'gpay') return `tez://upi/pay?${baseParams}`;
     if (formData.paymentMethod === 'phonepe') return `phonepe://pay?${baseParams}`;
