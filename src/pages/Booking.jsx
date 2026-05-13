@@ -365,12 +365,43 @@ export default function Booking() {
                           <p className="text-xs text-gray-500">Visa, Mastercard, RuPay</p>
                         </div>
                       </label>
+
+                      <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${formData.paymentMethod === 'gpay' ? 'border-black bg-white ring-1 ring-black' : 'border-gray-200 bg-white'}`}>
+                        <input type="radio" name="payment" value="gpay" checked={formData.paymentMethod === 'gpay'} onChange={() => updateForm('paymentMethod', 'gpay')} className="sr-only" />
+                        <div className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center mr-4 shadow-sm p-1">
+                          <svg viewBox="0 0 48 48" className="w-full h-full"><path fill="#4285F4" d="M32.8 24c0-1.4-.1-2.8-.4-4.1H24v7.8h4.9c-.2 2.5-1.9 4.7-4.1 5.4v4.5h6.7c3.9-3.6 6.3-8.8 6.3-13.6z"/><path fill="#34A853" d="M24 33c2.5 0 4.6-.8 6.1-2.2l-6.7-4.5c-.8.5-1.9.9-3.2.9-2.4 0-4.5-1.6-5.2-3.8h-7v4.6C11.5 31.8 17.3 33 24 33z"/><path fill="#FBBC05" d="M18.8 23.4c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2v-4.6h-7C10.5 17.1 10 19.5 10 22s.5 4.9 1.4 7.2l7.4-5.8z"/><path fill="#EA4335" d="M24 14.8c1.3 0 2.5.5 3.5 1.4l2.6-2.6C28.6 12.1 26.5 11 24 11c-6.7 0-12.5 3.8-15.6 9.4l7 4.6c.7-2.3 2.8-3.9 5.2-3.9z"/></svg>
+                        </div>
+                        <div>
+                          <p className="font-medium">Google Pay</p>
+                        </div>
+                      </label>
+
+                      <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${formData.paymentMethod === 'phonepe' ? 'border-black bg-white ring-1 ring-black' : 'border-gray-200 bg-white'}`}>
+                        <input type="radio" name="payment" value="phonepe" checked={formData.paymentMethod === 'phonepe'} onChange={() => updateForm('paymentMethod', 'phonepe')} className="sr-only" />
+                        <div className="w-8 h-8 rounded-full bg-[#5f259f] flex items-center justify-center mr-4 shadow-sm text-white font-bold text-[10px]">
+                          पे
+                        </div>
+                        <div>
+                          <p className="font-medium">PhonePe</p>
+                        </div>
+                      </label>
+
+                      <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${formData.paymentMethod === 'paytm' ? 'border-black bg-white ring-1 ring-black' : 'border-gray-200 bg-white'}`}>
+                        <input type="radio" name="payment" value="paytm" checked={formData.paymentMethod === 'paytm'} onChange={() => updateForm('paymentMethod', 'paytm')} className="sr-only" />
+                        <div className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center mr-4 shadow-sm text-[#00b9f1] font-bold text-[10px]">
+                          Paytm
+                        </div>
+                        <div>
+                          <p className="font-medium">Paytm</p>
+                        </div>
+                      </label>
+
                       <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${formData.paymentMethod === 'upi' ? 'border-black bg-white ring-1 ring-black' : 'border-gray-200 bg-white'}`}>
                         <input type="radio" name="payment" value="upi" checked={formData.paymentMethod === 'upi'} onChange={() => updateForm('paymentMethod', 'upi')} className="sr-only" />
-                        <div className="w-6 h-6 bg-green-100 text-green-700 rounded-md flex items-center justify-center font-bold text-xs mr-4">UPI</div>
+                        <div className="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold text-xs mr-4">UPI</div>
                         <div>
-                          <p className="font-medium">UPI Payment</p>
-                          <p className="text-xs text-gray-500">Google Pay, PhonePe, Paytm</p>
+                          <p className="font-medium">Other UPI Apps</p>
+                          <p className="text-xs text-gray-500">BHIM, Amazon Pay, Any UPI ID</p>
                         </div>
                       </label>
                     </div>
