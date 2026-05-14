@@ -6,10 +6,9 @@ import { useAppContext } from '../context/AppContext';
 import emailjs from '@emailjs/browser';
 
 // --- EMAILJS CONFIGURATION ---
-// IMPORTANT: Replace these with your actual keys from EmailJS
-const EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID_HERE';
-const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID_HERE';
-const EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY_HERE';
+const EMAILJS_SERVICE_ID = 'service_fk5s0ls';
+const EMAILJS_TEMPLATE_ID = 'qjirq4t6xyZmFv96_'; // Warning: This matches public key, might be incorrect
+const EMAILJS_PUBLIC_KEY = 'qjirq4t6xyZmFv96_';
 
 export default function Login() {
   const { login } = useAppContext();
