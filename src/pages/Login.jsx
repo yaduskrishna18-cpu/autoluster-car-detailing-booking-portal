@@ -7,7 +7,7 @@ import emailjs from '@emailjs/browser';
 
 // --- EMAILJS CONFIGURATION ---
 const EMAILJS_SERVICE_ID = 'service_fk5s0ls';
-const EMAILJS_TEMPLATE_ID = 'qjirq4t6xyZmFv96_'; // Warning: This matches public key, might be incorrect
+const EMAILJS_TEMPLATE_ID = 'template_9tjcmxn';
 const EMAILJS_PUBLIC_KEY = 'qjirq4t6xyZmFv96_';
 
 export default function Login() {
