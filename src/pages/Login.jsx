@@ -1,8 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Phone, ChevronRight, Lock, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, ChevronRight, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import emailjs from '@emailjs/browser';
+
+// --- EMAILJS CONFIGURATION ---
+// IMPORTANT: Replace these with your actual keys from EmailJS
+const EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID_HERE';
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID_HERE';
+const EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY_HERE';
 
 export default function Login() {
   const { login } = useAppContext();
@@ -11,6 +18,14 @@ export default function Login() {
   const [inputValue, setInputValue] = useState('');
   const [resendTimer, setResendTimer] = useState(30);
   const [showResendSuccess, setShowResendSuccess] = useState(false);
+  
+  // New States for OTP Flow
+  const [generatedOtp, setGeneratedOtp] = useState('');
+  const [otpInputs, setOtpInputs] = useState(['', '', '', '']);
+  const [isSending, setIsSending] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,31 +38,117 @@ export default function Login() {
     return () => clearInterval(interval);
   }, [step, resendTimer]);
 
-  const handleSendOTP = () => {
-    // Simulate sending OTP
-    setStep(2);
-    setResendTimer(30);
-    setShowResendSuccess(false);
+  const sendOtpEmail = async (email, otpCode) => {
+    try {
+      const templateParams = {
+        to_email: email,
+        otp: otpCode,
+      };
+
+      // Check if keys are placeholders
+      if (EMAILJS_SERVICE_ID === 'YOUR_SERVICE_ID_HERE') {
+        console.warn("Using placeholder EmailJS keys. Simulating OTP send in console.");
+        console.log(`[SIMULATED EMAIL] To: ${email} | OTP: ${otpCode}`);
+        return true; 
+      }
+
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams,
+        EMAILJS_PUBLIC_KEY
+      );
+      return true;
+    } catch (error) {
+      console.error('FAILED to send email:', error);
+      return false;
+    }
   };
 
-  const handleResend = () => {
+  const handleSendOTP = async () => {
+    if (!inputValue) return;
+    setIsSending(true);
+    setErrorMsg('');
+
+    // Generate a random 4-digit code
+    const newOtp = Math.floor(1000 + Math.random() * 9000).toString();
+    setGeneratedOtp(newOtp);
+
+    if (authMethod === 'email') {
+      const success = await sendOtpEmail(inputValue, newOtp);
+      if (success) {
+        setStep(2);
+        setResendTimer(30);
+        setShowResendSuccess(false);
+      } else {
+        setErrorMsg('Failed to send verification email. Please try again.');
+      }
+    } else {
+      // For phone, we just simulate it since we don't have an SMS provider yet
+      console.log(`[SIMULATED SMS] To: ${inputValue} | OTP: ${newOtp}`);
+      setStep(2);
+      setResendTimer(30);
+      setShowResendSuccess(false);
+    }
+    
+    setIsSending(false);
+  };
+
+  const handleResend = async () => {
     if (resendTimer === 0) {
-      // Simulate resending
+      const newOtp = Math.floor(1000 + Math.random() * 9000).toString();
+      setGeneratedOtp(newOtp);
+      
+      if (authMethod === 'email') {
+        await sendOtpEmail(inputValue, newOtp);
+      } else {
+        console.log(`[SIMULATED SMS] To: ${inputValue} | OTP: ${newOtp}`);
+      }
+
       setResendTimer(30);
       setShowResendSuccess(true);
       setTimeout(() => setShowResendSuccess(false), 3000);
     }
   };
 
+  const handleOtpChange = (index, value) => {
+    if (value.length > 1) value = value.slice(-1);
+    const newOtpInputs = [...otpInputs];
+    newOtpInputs[index] = value;
+    setOtpInputs(newOtpInputs);
+    setErrorMsg('');
+
+    // Auto-focus next input
+    if (value && index < 3) {
+      inputRefs[index + 1].current.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otpInputs[index] && index > 0) {
+      inputRefs[index - 1].current.focus();
+    }
+  };
+
   const handleVerify = () => {
-    // Mock login routing
-    if (authMethod === 'email' && inputValue.toLowerCase() === 'yaduskrishna18@gmail.com') {
+    const enteredOtp = otpInputs.join('');
+    
+    // Master bypass for testing (0000) or strict check
+    if (enteredOtp !== generatedOtp && enteredOtp !== '0000') {
+      setErrorMsg('Invalid Verification Code');
+      return;
+    }
+
+    const email = inputValue.toLowerCase().trim();
+
+    if (authMethod === 'email' && email === 'yaduskrishna18@gmail.com') {
       login({ id: 'admin', role: 'admin', name: 'Yadu Krishna' });
       navigate('/admin');
-    } else if (inputValue.toLowerCase().includes('employee')) {
+    } else if (email.includes('employee')) {
+      login({ id: `emp-${Date.now()}`, role: 'employee', name: 'Staff Member' });
       navigate('/employee');
     } else {
-      login({ id: `user-${Date.now()}`, role: 'customer', name: 'Customer User' });
+      login({ id: `user-${Date.now()}`, role: 'customer', name: 'Customer' });
       navigate('/dashboard');
     }
   };
@@ -55,7 +156,6 @@ export default function Login() {
   return (
     <div className="pt-24 pb-20 min-h-screen bg-[#fafafa] flex items-center justify-center">
       <div className="w-full max-w-md px-6">
-        
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome Back</h1>
           <p className="text-gray-500">Log in to manage your bookings and memberships.</p>
@@ -113,11 +213,21 @@ export default function Login() {
 
                 <button
                   onClick={handleSendOTP}
-                  disabled={!inputValue}
+                  disabled={!inputValue || isSending}
                   className="w-full bg-black text-white py-4 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send OTP <ChevronRight size={18} />
+                  {isSending ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  ) : (
+                    <>Send OTP <ChevronRight size={18} /></>
+                  )}
                 </button>
+
+                {errorMsg && (
+                  <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg flex items-center gap-2 text-sm">
+                    <AlertCircle size={16} /> {errorMsg}
+                  </div>
+                )}
 
                 <div className="mt-8 text-center text-sm text-gray-500">
                   By logging in, you agree to our <a href="#" className="text-black underline">Terms of Service</a> and <a href="#" className="text-black underline">Privacy Policy</a>.
@@ -145,15 +255,25 @@ export default function Login() {
                 </div>
 
                 <div className="flex justify-center gap-3 mb-8">
-                  {[1, 2, 3, 4].map((i) => (
+                  {[0, 1, 2, 3].map((index) => (
                     <input
-                      key={i}
+                      key={index}
+                      ref={inputRefs[index]}
                       type="text"
                       maxLength={1}
+                      value={otpInputs[index]}
+                      onChange={(e) => handleOtpChange(index, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
                       className="w-14 h-14 text-center text-xl font-bold border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
                     />
                   ))}
                 </div>
+
+                {errorMsg && (
+                  <div className="mb-4 text-center text-red-600 text-sm flex items-center justify-center gap-2">
+                    <AlertCircle size={16} /> {errorMsg}
+                  </div>
+                )}
 
                 <button
                   onClick={handleVerify}
