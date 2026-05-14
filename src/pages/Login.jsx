@@ -243,9 +243,36 @@ export default function Login() {
                 transition={{ duration: 0.3 }}
               >
                 <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
-                    <Lock size={24} className="text-gray-800" />
+                  {/* Logo Placeholder */}
+                  <div className="flex justify-center mb-6">
+                    <img 
+                      src="/logo.png" 
+                      alt="Autoluster Logo" 
+                      className="h-12 w-auto object-contain"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'block';
+                      }}
+                    />
+                    <span className="hidden text-2xl font-bold tracking-tighter">AL</span>
                   </div>
+
+                  {/* Profile Picture using unavatar.io */}
+                  <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 border border-gray-200 shadow-sm relative bg-gray-50 flex items-center justify-center">
+                    {authMethod === 'email' ? (
+                      <img 
+                        src={`https://unavatar.io/${inputValue}?fallback=https://api.dicebear.com/7.x/initials/svg?seed=${inputValue}`} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Phone size={28} className="text-gray-400" />
+                    )}
+                    <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1.5 shadow-sm border border-gray-100">
+                       <CheckCircle2 size={12} className="text-green-600" />
+                    </div>
+                  </div>
+                  
                   <h2 className="text-xl font-bold mb-2">Enter Verification Code</h2>
                   <p className="text-sm text-gray-500">
                     We've sent a 4-digit code to <br />

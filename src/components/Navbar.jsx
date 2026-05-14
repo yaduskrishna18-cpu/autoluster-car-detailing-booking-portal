@@ -36,7 +36,16 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 z-50">
-          <span className={`text-2xl font-bold tracking-tighter transition-colors ${
+          <img 
+            src="/logo.png" 
+            alt="Autoluster Logo" 
+            className={`h-8 w-auto object-contain ${(!isScrolled && location.pathname === '/' && !isMobileMenuOpen) ? 'invert' : ''}`}
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'block';
+            }}
+          />
+          <span className={`hidden text-2xl font-bold tracking-tighter transition-colors ${
             isScrolled || location.pathname !== '/' || isMobileMenuOpen ? 'text-black' : 'text-white'
           }`}>
             AUTOLUSTER
