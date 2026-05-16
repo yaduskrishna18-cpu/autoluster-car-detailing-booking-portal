@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, Calendar } from 'lucide-react';
+import { Menu, X, User, Calendar, LogOut } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 
 export default function Navbar() {
+  const { currentUser, logout } = useAppContext();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
@@ -85,15 +87,33 @@ export default function Navbar() {
 
         {/* Actions */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link
-            to="/login"
-            className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-gray-500 ${
-              isScrolled || location.pathname !== '/' ? 'text-gray-900' : 'text-gray-200 hover:text-white'
-            }`}
-          >
-            <User size={18} />
-            Login
-          </Link>
+          {currentUser ? (
+            <Link
+              to={currentUser.role === 'admin' ? '/admin' : currentUser.role === 'employee' ? '/employee' : '/dashboard'}
+              className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-gray-500 ${
+                isScrolled || location.pathname !== '/' ? 'text-gray-900' : 'text-gray-200 hover:text-white'
+              }`}
+            >
+              <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 bg-gray-50">
+                <img 
+                  src={`https://unavatar.io/${currentUser.email}?fallback=https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser.name)}`}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span className="hidden lg:block truncate max-w-[100px]">{currentUser.name}</span>
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-gray-500 ${
+                isScrolled || location.pathname !== '/' ? 'text-gray-900' : 'text-gray-200 hover:text-white'
+              }`}
+            >
+              <User size={18} />
+              Login
+            </Link>
+          )}
           <Link
             to="/booking"
             className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
@@ -150,14 +170,31 @@ export default function Navbar() {
                 );
               })}
               <div className="flex flex-col gap-4 mt-8 w-full max-w-xs">
-                <Link
-                  to="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex justify-center items-center gap-2 text-lg font-medium text-gray-900 border border-gray-200 py-3 rounded-full"
-                >
-                  <User size={20} />
-                  Login
-                </Link>
+                {currentUser ? (
+                  <Link
+                    to={currentUser.role === 'admin' ? '/admin' : currentUser.role === 'employee' ? '/employee' : '/dashboard'}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex justify-center items-center gap-3 text-lg font-medium text-gray-900 border border-gray-200 py-3 rounded-full"
+                  >
+                    <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 bg-gray-50">
+                      <img 
+                        src={`https://unavatar.io/${currentUser.email}?fallback=https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser.name)}`}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {currentUser.name}
+                  </Link>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex justify-center items-center gap-2 text-lg font-medium text-gray-900 border border-gray-200 py-3 rounded-full"
+                  >
+                    <User size={20} />
+                    Login
+                  </Link>
+                )}
                 <Link
                   to="/booking"
                   onClick={() => setIsMobileMenuOpen(false)}

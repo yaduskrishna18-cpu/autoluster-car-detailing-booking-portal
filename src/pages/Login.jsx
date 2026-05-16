@@ -139,15 +139,16 @@ export default function Login() {
     }
 
     const email = inputValue.toLowerCase().trim();
+    const extractedName = email.split('@')[0].replace(/[._0-9]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).trim();
 
     if (authMethod === 'email' && email === 'yaduskrishna18@gmail.com') {
-      login({ id: 'admin', role: 'admin', name: 'Yadu Krishna' });
+      login({ id: 'admin', role: 'admin', name: extractedName || 'Yadu Krishna', email });
       navigate('/admin');
     } else if (email.includes('employee')) {
-      login({ id: `emp-${Date.now()}`, role: 'employee', name: 'Staff Member' });
+      login({ id: `emp-${Date.now()}`, role: 'employee', name: extractedName || 'Staff Member', email });
       navigate('/employee');
     } else {
-      login({ id: `user-${Date.now()}`, role: 'customer', name: 'Customer' });
+      login({ id: `user-${Date.now()}`, role: 'customer', name: extractedName || 'Customer', email });
       navigate('/dashboard');
     }
   };
