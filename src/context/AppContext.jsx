@@ -34,8 +34,8 @@ export function AppProvider({ children }) {
   const [employees, setEmployees] = useState(() => {
     const saved = localStorage.getItem('al_employees');
     return saved ? JSON.parse(saved) : [
-      { id: 'EMP-001', name: 'Ravi Kumar', email: 'ravi@example.com', phone: '9876543210', location: 'Koramangala, Bangalore', status: 'Active', today: 1800, week: 12400, month: 45000 },
-      { id: 'EMP-002', name: 'Arun Patel', email: 'arun@example.com', phone: '9876543211', location: 'Indiranagar, Bangalore', status: 'Active', today: 300, week: 8900, month: 38000 },
+      { id: 'autoluster01', name: 'Ravi Kumar', email: 'ravi@example.com', phone: '9876543210', location: 'Koramangala, Bangalore', status: 'Active', today: 1800, week: 12400, month: 45000 },
+      { id: 'autoluster02', name: 'Arun Patel', email: 'arun@example.com', phone: '9876543211', location: 'Indiranagar, Bangalore', status: 'Active', today: 300, week: 8900, month: 38000 },
     ];
   });
 
@@ -43,8 +43,8 @@ export function AppProvider({ children }) {
   const [bookings, setBookings] = useState(() => {
     const saved = localStorage.getItem('al_bookings');
     return saved ? JSON.parse(saved) : [
-      { id: 'ORD-1092', customer: 'Rahul Sharma', service: 'Full Body Detailing', vehicle: 'BMW 5 Series', time: '10:00 AM', location: 'Koramangala, Bangalore', price: 4499, status: 'Assigned', employee: 'EMP-001' },
-      { id: 'ORD-1093', customer: 'Anjali Verma', service: 'Normal Wash', vehicle: 'Honda City', time: '02:00 PM', location: 'Indiranagar, Bangalore', price: 699, status: 'Completed', employee: 'EMP-002' },
+      { id: 'ORD-1092', customer: 'Rahul Sharma', service: 'Full Body Detailing', vehicle: 'BMW 5 Series', time: '10:00 AM', location: 'Koramangala, Bangalore', price: 4499, status: 'Assigned', employee: 'autoluster01' },
+      { id: 'ORD-1093', customer: 'Anjali Verma', service: 'Normal Wash', vehicle: 'Honda City', time: '02:00 PM', location: 'Indiranagar, Bangalore', price: 699, status: 'Completed', employee: 'autoluster02' },
       { id: 'ORD-1094', customer: 'Vikram Singh', service: 'Ceramic Coating', vehicle: 'Audi RS7', time: '05:00 PM', location: 'Whitefield, Bangalore', price: 9999, status: 'Pending', employee: 'Unassigned' },
     ];
   });
@@ -67,8 +67,8 @@ export function AppProvider({ children }) {
   const deleteGalleryWork = (id) => setGalleryWorks(galleryWorks.filter(w => w.id !== id));
 
   const addEmployee = (employee) => {
-    const newId = `EMP-00${employees.length + 1}`;
-    setEmployees([...employees, { ...employee, id: newId, status: 'Pending', today: 0, week: 0, month: 0 }]);
+    const newId = `autoluster${String(employees.length + 1).padStart(2, '0')}`;
+    setEmployees([...employees, { ...employee, id: newId, status: 'Active', today: 0, week: 0, month: 0 }]);
     return newId;
   };
 

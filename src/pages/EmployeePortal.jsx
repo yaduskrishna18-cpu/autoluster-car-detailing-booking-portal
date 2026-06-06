@@ -2,12 +2,19 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserPlus, Briefcase, IndianRupee, Clock, MapPin, CheckCircle2, ChevronRight, User, Mail, Phone, ImagePlus } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
+import emailjs from '@emailjs/browser';
+
+const EMAILJS_SERVICE_ID = 'service_fk5s0ls';
+const EMAILJS_TEMPLATE_ID = 'template_mwkrf0n';
+const EMAILJS_PUBLIC_KEY = 'qjirq4t6xyZmFv96_';
 
 export default function EmployeePortal() {
-  const { employees, bookings, completeBooking, addGalleryWork, currentUser, login } = useAppContext();
+  const { employees, bookings, completeBooking, addGalleryWork, currentUser, login, addEmployee } = useAppContext();
   
   const [authMode, setAuthMode] = useState('login'); // 'login', 'register', 'pending'
   const [empId, setEmpId] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const [regData, setRegData] = useState({ name: '', email: '', phone: '', location: '' });
   
   // Upload State
@@ -27,6 +34,10 @@ export default function EmployeePortal() {
   };
 
   const handleLogin = () => {
+    if (password !== 'autoluster2025') {
+      alert("Invalid Password. Please enter autoluster2025");
+      return;
+    }
     const emp = employees.find(e => e.id.toLowerCase() === empId.trim().toLowerCase() && e.status === 'Active');
     if (emp) {
       login({ ...emp, role: 'employee' });
@@ -35,8 +46,62 @@ export default function EmployeePortal() {
     }
   };
 
-  const handleRegister = () => {
-    if (regData.name && regData.phone && regData.location) {
+  const handleRegister = async () => {
+    if (regData.name && regData.phone && regData.location && regData.email) {
+      setIsSending(true);
+      
+      const newId = addEmployee({
+        name: regData.name,
+        email: regData.email,
+        phone: regData.phone,
+        location: regData.location,
+        status: 'Active'
+      });
+
+      try {
+        const templateParams = {
+          to_name: regData.name,
+          from_name: 'Autoluster',
+          to_email: regData.email,
+          owner_email: 'yaduskrishna18@gmail.com',
+          admin_email: 'yaduskrishna18@gmail.com',
+          cc_to: 'yaduskrishna18@gmail.com',
+          message: `Welcome to the team! Your Login ID is: ${newId}. Your temporary password is: autoluster2025. Please keep this information secure.`,
+          otp: `Your Login ID is: ${newId} (Password: autoluster2025)`
+        };
+
+        if (EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID_HERE') {
+          // Send to Employee
+          const response = await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            templateParams,
+            EMAILJS_PUBLIC_KEY
+          );
+          console.log('EmailJS Success (Employee):', response.status, response.text);
+
+          // Send notification to Owner
+          const ownerParams = {
+            ...templateParams,
+            to_email: 'yaduskrishna18@gmail.com',
+            to_name: 'Owner',
+            message: `New Employee Request! Name: ${regData.name}, Email: ${regData.email}, Phone: ${regData.phone}, Location: ${regData.location}. Generated ID: ${newId}`
+          };
+          
+          const ownerResponse = await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            ownerParams,
+            EMAILJS_PUBLIC_KEY
+          );
+          console.log('EmailJS Success (Owner):', ownerResponse.status, ownerResponse.text);
+        }
+      } catch (error) {
+        console.error('FAILED to send email:', error);
+        alert('EmailJS Error: ' + (error.text || error.message || JSON.stringify(error)));
+      }
+
+      setIsSending(false);
       setAuthMode('pending');
     }
   };
@@ -80,11 +145,29 @@ export default function EmployeePortal() {
                 
                 <input 
                   type="text" 
-                  placeholder="Enter Employee ID (e.g. EMP-001)"
+                  placeholder="Enter Employee ID (e.g. autoluster01)"
                   value={empId}
                   onChange={(e) => setEmpId(e.target.value)}
                   className="w-full p-4 border border-gray-200 rounded-xl mb-4 focus:ring-1 focus:ring-black focus:outline-none"
                 />
+                <AnimatePresence>
+                  {empId.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mb-4 overflow-hidden"
+                    >
+                      <input 
+                        type="password" 
+                        placeholder="Enter Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full p-4 border border-gray-200 rounded-xl focus:ring-1 focus:ring-black focus:outline-none"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <button 
                   onClick={handleLogin}
                   disabled={!empId.trim()}
@@ -136,10 +219,14 @@ export default function EmployeePortal() {
 
                 <button 
                   onClick={handleRegister}
-                  disabled={!regData.name || !regData.phone || !regData.location}
+                  disabled={!regData.name || !regData.phone || !regData.location || !regData.email || isSending}
                   className="w-full bg-black text-white py-4 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50"
                 >
-                  Send Request to Owner <ChevronRight size={18} />
+                  {isSending ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  ) : (
+                    <>Register & Send ID <ChevronRight size={18} /></>
+                  )}
                 </button>
 
                 <div className="mt-6 text-center text-sm">
@@ -159,11 +246,11 @@ export default function EmployeePortal() {
                 <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
                   <CheckCircle2 size={40} className="text-blue-600" />
                 </div>
-                <h1 className="text-2xl font-bold mb-4">Request Submitted!</h1>
+                <h1 className="text-2xl font-bold mb-4">Registration Complete!</h1>
                 <p className="text-gray-500 text-sm leading-relaxed mb-8">
-                  Your application has been sent directly to the owner for review. 
+                  Your employee account has been created successfully. 
                   <br/><br/>
-                  After acceptance, you will receive your permanent <b>Employee ID</b> via WhatsApp or Email.
+                  We have sent your permanent <b>Employee ID</b> to your email. You can now use it along with the password to log in.
                 </p>
                 <button 
                   onClick={() => {
