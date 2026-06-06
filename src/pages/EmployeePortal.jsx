@@ -55,7 +55,7 @@ export default function EmployeePortal() {
         email: regData.email,
         phone: regData.phone,
         location: regData.location,
-        status: 'Active'
+        status: 'Pending'
       });
 
       try {
@@ -248,9 +248,9 @@ export default function EmployeePortal() {
                 </div>
                 <h1 className="text-2xl font-bold mb-4">Registration Complete!</h1>
                 <p className="text-gray-500 text-sm leading-relaxed mb-8">
-                  Your employee account has been created successfully. 
+                  Your employee account request has been created successfully. 
                   <br/><br/>
-                  We have sent your permanent <b>Employee ID</b> to your email. You can now use it along with the password to log in.
+                  We have sent your permanent <b>Employee ID</b> to your email. Once the owner approves your request, you can use it along with the password to log in.
                 </p>
                 <button 
                   onClick={() => {

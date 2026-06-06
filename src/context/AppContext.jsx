@@ -68,8 +68,16 @@ export function AppProvider({ children }) {
 
   const addEmployee = (employee) => {
     const newId = `autoluster${String(employees.length + 1).padStart(2, '0')}`;
-    setEmployees([...employees, { ...employee, id: newId, status: 'Active', today: 0, week: 0, month: 0 }]);
+    setEmployees([...employees, { ...employee, id: newId, status: employee.status || 'Pending', today: 0, week: 0, month: 0 }]);
     return newId;
+  };
+
+  const approveEmployee = (id) => {
+    setEmployees(employees.map(emp => emp.id === id ? { ...emp, status: 'Active' } : emp));
+  };
+
+  const rejectEmployee = (id) => {
+    setEmployees(employees.filter(emp => emp.id !== id));
   };
 
   const addBooking = (booking) => {
@@ -120,7 +128,7 @@ export function AppProvider({ children }) {
       currentUser, login, logout,
       reviews, addReview, deleteReview,
       galleryWorks, addGalleryWork, deleteGalleryWork,
-      employees, addEmployee,
+      employees, addEmployee, approveEmployee, rejectEmployee,
       bookings, addBooking, completeBooking
     }}>
       {children}

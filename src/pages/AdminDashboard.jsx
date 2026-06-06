@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, FileText, IndianRupee, ShieldAlert, CheckCircle, TrendingUp, Search } from 'lucide-react';
+import { Users, FileText, IndianRupee, ShieldAlert, CheckCircle, TrendingUp, Search, UserPlus, Check, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 
 export default function AdminDashboard() {
-  const { employees, bookings, logout } = useAppContext();
+  const { employees, bookings, logout, approveEmployee, rejectEmployee } = useAppContext();
   const [activeTab, setActiveTab] = useState('orders'); // orders, staff, financials
   const navigate = useNavigate();
 
@@ -21,7 +21,9 @@ export default function AdminDashboard() {
   const assignedBookings = bookings.filter(b => b.status === 'Assigned').length;
   
   const onlineStaff = employees.filter(e => e.status === 'Active').length;
-  const totalStaff = employees.length;
+  const activeStaffList = employees.filter(e => e.status !== 'Pending');
+  const pendingStaff = employees.filter(e => e.status === 'Pending');
+  const totalStaff = activeStaffList.length;
 
   return (
     <div className="pt-24 pb-20 min-h-screen bg-[#fafafa]">
@@ -87,6 +89,12 @@ export default function AdminDashboard() {
           >
             Staff & Earnings
           </button>
+          <button 
+            onClick={() => setActiveTab('requests')}
+            className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'requests' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-black'}`}
+          >
+            Requests {pendingStaff.length > 0 && <span className="bg-red-500 text-white rounded-full px-2 py-0.5 text-xs ml-1">{pendingStaff.length}</span>}
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -146,7 +154,7 @@ export default function AdminDashboard() {
                 <h2 className="text-xl font-bold flex items-center gap-2"><Users size={20}/> Employee Roster & Earnings</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {employees.map(staff => (
+                {activeStaffList.map(staff => (
                   <div key={staff.id} className="border border-gray-100 rounded-2xl p-5 hover:border-gray-300 transition-colors">
                     <div className="flex justify-between items-start mb-4">
                       <div>
@@ -174,6 +182,52 @@ export default function AdminDashboard() {
                   </div>
                 ))}
               </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'requests' && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold flex items-center gap-2"><UserPlus size={20}/> Employee Requests</h2>
+              </div>
+              
+              {pendingStaff.length === 0 ? (
+                <div className="text-center py-10 text-gray-500">
+                  <UserPlus size={48} className="mx-auto mb-3 text-gray-300" />
+                  <p>No pending employee requests at the moment.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {pendingStaff.map(staff => (
+                    <div key={staff.id} className="border border-orange-200 bg-orange-50/30 rounded-2xl p-5">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="font-bold text-lg">{staff.name}</h3>
+                          <p className="text-sm text-gray-600">{staff.email}</p>
+                          <p className="text-xs text-gray-500 font-medium mt-1">ID: {staff.id}</p>
+                          <p className="text-xs text-gray-500 mt-1">{staff.phone} • {staff.location}</p>
+                        </div>
+                        <span className="text-orange-500 text-xs font-bold bg-orange-100 px-2 py-1 rounded">Pending</span>
+                      </div>
+                      
+                      <div className="flex gap-2 mt-4 pt-4 border-t border-orange-100">
+                        <button 
+                          onClick={() => approveEmployee(staff.id)}
+                          className="flex-1 bg-black text-white py-2 rounded-xl text-sm font-medium flex items-center justify-center gap-1 hover:bg-gray-800 transition-colors"
+                        >
+                          <Check size={16} /> Approve
+                        </button>
+                        <button 
+                          onClick={() => rejectEmployee(staff.id)}
+                          className="flex-1 bg-white border border-gray-200 text-black py-2 rounded-xl text-sm font-medium flex items-center justify-center gap-1 hover:bg-gray-50 transition-colors"
+                        >
+                          <X size={16} /> Reject
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </motion.div>
           )}
 
