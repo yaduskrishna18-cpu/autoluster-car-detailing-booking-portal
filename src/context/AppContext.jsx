@@ -49,6 +49,16 @@ export function AppProvider({ children }) {
   useEffect(() => { localStorage.setItem('al_employees_v2', JSON.stringify(employees)); }, [employees]);
   useEffect(() => { localStorage.setItem('al_bookings_v2', JSON.stringify(bookings)); }, [bookings]);
 
+  // Sync across tabs
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'al_employees_v2' && e.newValue) setEmployees(JSON.parse(e.newValue));
+      if (e.key === 'al_bookings_v2' && e.newValue) setBookings(JSON.parse(e.newValue));
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   // --- Helper Functions ---
   const login = (userObj) => setCurrentUser(userObj);
   const logout = () => setCurrentUser(null);

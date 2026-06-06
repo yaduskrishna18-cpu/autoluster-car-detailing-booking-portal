@@ -215,13 +215,13 @@ export default function AdminDashboard() {
                           onClick={() => approveEmployee(staff.id)}
                           className="flex-1 bg-black text-white py-2 rounded-xl text-sm font-medium flex items-center justify-center gap-1 hover:bg-gray-800 transition-colors"
                         >
-                          <Check size={16} /> Approve
+                          <Check size={16} /> Accept
                         </button>
                         <button 
                           onClick={() => rejectEmployee(staff.id)}
                           className="flex-1 bg-white border border-gray-200 text-black py-2 rounded-xl text-sm font-medium flex items-center justify-center gap-1 hover:bg-gray-50 transition-colors"
                         >
-                          <X size={16} /> Reject
+                          <X size={16} /> Decline
                         </button>
                       </div>
                     </div>
