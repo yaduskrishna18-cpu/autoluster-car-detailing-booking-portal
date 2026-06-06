@@ -32,29 +32,22 @@ export function AppProvider({ children }) {
 
   // Employees
   const [employees, setEmployees] = useState(() => {
-    const saved = localStorage.getItem('al_employees');
-    return saved ? JSON.parse(saved) : [
-      { id: 'autoluster01', name: 'Ravi Kumar', email: 'ravi@example.com', phone: '9876543210', location: 'Koramangala, Bangalore', status: 'Active', today: 1800, week: 12400, month: 45000 },
-      { id: 'autoluster02', name: 'Arun Patel', email: 'arun@example.com', phone: '9876543211', location: 'Indiranagar, Bangalore', status: 'Active', today: 300, week: 8900, month: 38000 },
-    ];
+    const saved = localStorage.getItem('al_employees_v2');
+    return saved ? JSON.parse(saved) : [];
   });
 
   // Bookings
   const [bookings, setBookings] = useState(() => {
-    const saved = localStorage.getItem('al_bookings');
-    return saved ? JSON.parse(saved) : [
-      { id: 'ORD-1092', customer: 'Rahul Sharma', service: 'Full Body Detailing', vehicle: 'BMW 5 Series', time: '10:00 AM', location: 'Koramangala, Bangalore', price: 4499, status: 'Assigned', employee: 'autoluster01' },
-      { id: 'ORD-1093', customer: 'Anjali Verma', service: 'Normal Wash', vehicle: 'Honda City', time: '02:00 PM', location: 'Indiranagar, Bangalore', price: 699, status: 'Completed', employee: 'autoluster02' },
-      { id: 'ORD-1094', customer: 'Vikram Singh', service: 'Ceramic Coating', vehicle: 'Audi RS7', time: '05:00 PM', location: 'Whitefield, Bangalore', price: 9999, status: 'Pending', employee: 'Unassigned' },
-    ];
+    const saved = localStorage.getItem('al_bookings_v2');
+    return saved ? JSON.parse(saved) : [];
   });
 
   // --- Effects for Synchronization ---
   useEffect(() => { localStorage.setItem('al_currentUser', JSON.stringify(currentUser)); }, [currentUser]);
   useEffect(() => { localStorage.setItem('al_reviews', JSON.stringify(reviews)); }, [reviews]);
   useEffect(() => { localStorage.setItem('al_gallery', JSON.stringify(galleryWorks)); }, [galleryWorks]);
-  useEffect(() => { localStorage.setItem('al_employees', JSON.stringify(employees)); }, [employees]);
-  useEffect(() => { localStorage.setItem('al_bookings', JSON.stringify(bookings)); }, [bookings]);
+  useEffect(() => { localStorage.setItem('al_employees_v2', JSON.stringify(employees)); }, [employees]);
+  useEffect(() => { localStorage.setItem('al_bookings_v2', JSON.stringify(bookings)); }, [bookings]);
 
   // --- Helper Functions ---
   const login = (userObj) => setCurrentUser(userObj);
